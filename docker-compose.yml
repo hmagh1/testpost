@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  php_server:
+    build: ./php
+    ports:
+      - "8000:80"
+    volumes:
+      - ./php:/var/www/html
+    depends_on:
+      - mysql_sgbd
+    networks:
+      - app-network
+
+  mysql_sgbd:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+
+  phpmyadmin_ui:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql_sgbd
+    depends_on:
+      - mysql_sgbd
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+
+networks:
+  app-network:
